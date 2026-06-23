@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle Financeiro Raspael</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg: #FAF8F3;
+  --surface: #FFFFFF;
+  --ink: #20231F;
+  --ink-soft: #5C6259;
+  --line: #E4E0D6;
+  --brand: #2F5D52;
+  --brand-dark: #1F4338;
+  --brand-tint: #E7F0EC;
+  --gold: #B8862F;
+  --particular: #1B2A4A;
+  --particular-bg: #DDE2EE;
+  --zenklub: #2F6FED;
+  --zenklub-bg: #E5EDFE;
+  --vitude: #F0791F;
+  --vitude-bg: #FDE9D8;
+  --docway: #2E9D5C;
+  --docway-bg: #E0F3E5;
+  --evento: #7C3AED;
+  --evento-bg: #EDE5FC;
+  --danger: #C2483B;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(32,35,31,0.04), 0 4px 16px rgba(32,35,31,0.06);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+.serif{font-family:'Fraunces',serif;}
+.mono{font-family:'JetBrains Mono',monospace;}
+
+/* ---------- Top bar ---------- */
+.topbar{
+  position:sticky; top:0; z-index:30;
+  background:var(--brand-dark);
+  color:#fff;
+  padding:14px 20px;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; flex-wrap:wrap;
+}
+.brand{
+  display:flex; align-items:baseline; gap:10px;
+}
+.brand .mark{
+  font-family:'Fraunces',serif; font-weight:700; font-size:22px; letter-spacing:-0.02em;
+}
+.brand .sub{ font-size:11px; opacity:0.65; text-transform:uppercase; letter-spacing:0.08em;}
+.nav-tabs{display:flex; gap:4px; background:rgba(255,255,255,0.08); padding:4px; border-radius:8px;}
+.nav-tabs button{
+  background:transparent; border:none; color:rgba(255,255,255,0.75);
+  padding:7px 14px; border-radius:6px; font-size:13.5px; font-weight:600; cursor:pointer;
+  font-family:'Inter',sans-serif; transition:all .15s;
+}
+.nav-tabs button.active{background:#fff; color:var(--brand-dark);}
+.nav-tabs button:hover:not(.active){color:#fff; background:rgba(255,255,255,0.12);}
+
+.container{max-width:1280px; margin:0 auto; padding:20px;}
+
+/* ---------- Week nav ---------- */
+.week-nav{
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:12px 16px; margin-bottom:18px; box-shadow:var(--shadow); flex-wrap:wrap; gap:10px;
+}
+.week-nav .ctrl{display:flex; align-items:center; gap:8px;}
+.iconbtn{
+  width:34px; height:34px; border-radius:8px; border:1px solid var(--line); background:#fff;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--brand-dark);
+  transition:background .15s;
+}
+.iconbtn:hover{background:var(--brand-tint);}
+.week-label{font-family:'Fraunces',serif; font-weight:600; font-size:17px;}
+.week-range{font-size:12px; color:var(--ink-soft);}
+select.month-select{
+  border:1px solid var(--line); border-radius:8px; padding:7px 10px; font-family:'Inter'; font-size:13px;
+  background:#fff; color:var(--ink); cursor:pointer;
+}
+.today-btn{
+  border:1px solid var(--brand); color:var(--brand-dark); background:#fff; border-radius:8px; padding:7px 12px;
+  font-size:13px; font-weight:600; cursor:pointer;
+}
+.today-btn:hover{background:var(--brand-tint);}
+
+/* ---------- Goal panel ---------- */
+.goal-panel{
+  background:linear-gradient(135deg, var(--brand-dark), var(--brand));
+  color:#fff; border-radius:var(--radius); padding:20px 22px; margin-bottom:18px;
+  box-shadow:var(--shadow);
+  display:grid; grid-template-columns:1.3fr 1fr; gap:24px; align-items:center;
+}
+.goal-left .eyebrow{font-size:11px; letter-spacing:0.1em; text-transform:uppercase; opacity:0.7; margin-bottom:6px;}
+.goal-figures{display:flex; gap:28px; flex-wrap:wrap; margin-bottom:12px;}
+.goal-figures .fig .num{font-family:'Fraunces',serif; font-size:28px; font-weight:600; line-height:1;}
+.goal-figures .fig .lbl{font-size:11.5px; opacity:0.7; margin-top:4px;}
+.progress-track{height:10px; background:rgba(255,255,255,0.18); border-radius:6px; overflow:hidden;}
+.progress-fill{height:100%; background:#fff; border-radius:6px; transition:width .4s ease;}
+.progress-pct{font-size:12.5px; opacity:0.85; margin-top:6px;}
+.goal-right{
+  background:rgba(255,255,255,0.08); border-radius:8px; padding:14px 16px; font-size:13px; line-height:1.55;
+  border:1px solid rgba(255,255,255,0.15);
+}
+.goal-right .ind-row{display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed rgba(255,255,255,0.15);}
+.goal-right .ind-row:last-child{border-bottom:none;}
+.goal-right .ind-row b{font-family:'Fraunces',serif; font-weight:600;}
+.projection-msg{margin-top:8px; font-size:12.5px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.15);}
+
+/* ---------- Grid ---------- */
+.grid-wrap{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  overflow:auto; box-shadow:var(--shadow); margin-bottom:24px;
+}
+table.grid{border-collapse:collapse; width:100%; min-width:760px;}
+table.grid th{
+  background:var(--brand-tint); color:var(--brand-dark); font-family:'Fraunces',serif; font-weight:600;
+  font-size:14px; padding:10px 6px; text-align:center; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:2;
+}
+table.grid th .date-sub{display:block; font-family:'Inter'; font-weight:500; font-size:10.5px; color:var(--ink-soft); margin-top:2px;}
+table.grid td.time-col{
+  font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--ink-soft); text-align:right; padding:0 10px;
+  border-right:1px solid var(--line); border-bottom:1px solid var(--line); background:#FCFBF8; white-space:nowrap; vertical-align:middle;
+}
+table.grid td.cell{
+  border:1px solid var(--line); padding:0; height:44px; min-width:96px; cursor:pointer; vertical-align:middle; position:relative;
+  transition:background .12s;
+}
+table.grid td.cell.empty:hover{background:#F4F2EC;}
+table.grid td.cell.filled{padding:4px 6px;}
+.cell-inner{
+  border-radius:6px; height:100%; padding:4px 7px; display:flex; flex-direction:column; justify-content:center; gap:1px;
+}
+.cell-platform{font-size:11.5px; font-weight:700;}
+.cell-value{font-family:'JetBrains Mono',monospace; font-size:11px; opacity:0.85;}
+.cell-plus{color:#C7C2B3; font-size:15px; text-align:center; width:100%; opacity:0; transition:opacity .12s;}
+td.cell.empty:hover .cell-plus{opacity:1;}
+
+.row-total td{background:var(--brand-tint); border-top:2px solid var(--brand); font-weight:700;}
+.row-total td.time-col{background:var(--brand-tint);}
+.day-total-cell{font-size:11px; text-align:center; padding:8px 4px !important; line-height:1.4;}
+.day-total-cell .amt{display:block; font-family:'Fraunces',serif; font-size:14px; color:var(--brand-dark);}
+
+.week-summary-bar{
+  display:flex; justify-content:flex-end; gap:30px; background:var(--ink); color:#fff; padding:12px 18px;
+  border-radius:var(--radius); margin-bottom:24px; box-shadow:var(--shadow); flex-wrap:wrap;
+}
+.week-summary-bar .item{text-align:right;}
+.week-summary-bar .item .num{font-family:'Fraunces',serif; font-size:19px; font-weight:600;}
+.week-summary-bar .item .lbl{font-size:10.5px; opacity:0.6; text-transform:uppercase; letter-spacing:0.06em;}
+
+/* ---------- Legend ---------- */
+.legend{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;}
+.legend .chip{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-soft);}
+.legend .dot{width:11px; height:11px; border-radius:3px;}
+
+/* ---------- Modal ---------- */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(32,35,31,0.45); display:none; align-items:center; justify-content:center; z-index:100; padding:16px;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:#fff; border-radius:14px; width:100%; max-width:420px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.25);
+  max-height:90vh; overflow:auto;
+}
+.modal h3{font-family:'Fraunces',serif; margin:0 0 4px; font-size:20px;}
+.modal .modal-sub{font-size:12.5px; color:var(--ink-soft); margin-bottom:18px;}
+.field{margin-bottom:16px;}
+.field label{display:block; font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;}
+.platform-options{display:grid; grid-template-columns:repeat(2,1fr); gap:8px;}
+.platform-opt{
+  border:1.5px solid var(--line); border-radius:8px; padding:9px 10px; text-align:center; font-weight:700; font-size:13px;
+  cursor:pointer; transition:all .12s; color:var(--ink-soft);
+}
+.platform-opt.sel-tipo-atendimento.active{background:var(--brand-dark); border-color:var(--brand-dark); color:#fff;}
+.platform-opt.sel-tipo-evento.active{background:var(--evento); border-color:var(--evento); color:#fff;}
+.platform-options.locked .platform-opt{cursor:default; opacity:0.55; pointer-events:none;}
+.platform-options.locked .platform-opt.active{opacity:1;}
+.value-chips{display:flex; gap:7px; flex-wrap:wrap; margin-bottom:8px;}
+.value-chip{
+  border:1.5px solid var(--line); background:#fff; border-radius:20px; padding:6px 13px; font-size:13px; cursor:pointer; font-family:'JetBrains Mono',monospace; font-weight:600;
+}
+.value-chip.active{background:var(--brand); border-color:var(--brand); color:#fff;}
+input[type=number], input[type=text], textarea, select.std{
+  width:100%; border:1.5px solid var(--line); border-radius:8px; padding:9px 11px; font-size:14px; font-family:'Inter'; color:var(--ink);
+}
+textarea{resize:vertical; min-height:60px;}
+.modal-actions{display:flex; gap:10px; margin-top:20px;}
+.btn{
+  flex:1; padding:11px; border-radius:8px; border:none; font-weight:700; font-size:13.5px; cursor:pointer; font-family:'Inter';
+}
+.btn-primary{background:var(--brand); color:#fff;}
+.btn-primary:hover{background:var(--brand-dark);}
+.btn-secondary{background:#F1EFE8; color:var(--ink);}
+.btn-secondary:hover{background:#E8E5DC;}
+.btn-danger{background:#fff; color:var(--danger); border:1.5px solid var(--danger); flex:0 0 auto; padding:11px 16px;}
+.btn-danger:hover{background:#FCEEEC;}
+.close-x{position:absolute; top:18px; right:18px; cursor:pointer; color:var(--ink-soft); font-size:18px; background:none; border:none;}
+
+/* ---------- Reports ---------- */
+.report-section{margin-bottom:28px;}
+.report-section h2{font-family:'Fraunces',serif; font-size:18px; margin:0 0 14px; display:flex; align-items:center; gap:8px;}
+.cards-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px;}
+.platform-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow);
+  border-left:5px solid var(--ink);
+}
+.platform-card h4{margin:0 0 10px; font-size:14px; font-family:'Fraunces',serif; font-weight:600;}
+.platform-card .row{display:flex; justify-content:space-between; font-size:12.5px; padding:3px 0; color:var(--ink-soft);}
+.platform-card .row b{color:var(--ink); font-family:'JetBrains Mono',monospace;}
+
+.month-stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:10px;}
+.stat-box{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow);}
+.stat-box .num{font-family:'Fraunces',serif; font-size:22px; font-weight:600; color:var(--brand-dark);}
+.stat-box .lbl{font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.05em; margin-top:3px;}
+
+.chart-card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); margin-bottom:16px;}
+.chart-card h4{margin:0 0 12px; font-family:'Fraunces',serif; font-size:14.5px;}
+canvas{max-height:260px;}
+
+/* ---------- Settings ---------- */
+.settings-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px;}
+.settings-card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow);}
+.settings-card h4{margin:0 0 12px; font-family:'Fraunces',serif; font-size:15px;}
+.value-edit-row{display:flex; gap:6px; margin-bottom:7px; align-items:center;}
+.value-edit-row input{flex:1;}
+.remove-val{background:none; border:none; color:var(--danger); cursor:pointer; font-size:16px; padding:4px;}
+.add-val-btn{font-size:12px; color:var(--brand); background:none; border:1px dashed var(--brand); border-radius:6px; padding:6px 10px; cursor:pointer; width:100%; margin-top:4px;}
+.meta-edit{display:flex; align-items:center; gap:8px;}
+.meta-edit input{width:140px;}
+.save-settings-bar{margin-top:18px; display:flex; justify-content:flex-end;}
+
+.empty-state{text-align:center; padding:50px 20px; color:var(--ink-soft);}
+.empty-state .big{font-family:'Fraunces',serif; font-size:18px; color:var(--ink); margin-bottom:6px;}
+
+.toast{
+  position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 18px;
+  border-radius:8px; font-size:13px; z-index:200; opacity:0; pointer-events:none; transition:opacity .25s;
+}
+.toast.show{opacity:1;}
+
+@media (max-width:720px){
+  .goal-panel{grid-template-columns:1fr;}
+  .topbar{padding:12px 14px;}
+  .container{padding:12px;}
+}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" style="display:none; position:fixed; inset:0; background:var(--bg); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:16px; padding:32px 28px; width:100%; max-width:380px; box-shadow:var(--shadow); border:1px solid var(--line);">
+    <div style="text-align:center; margin-bottom:24px;">
+      <div style="font-family:'Fraunces',serif; font-size:28px; font-weight:700; color:var(--brand-dark);">Raspael</div>
+      <div style="font-size:13px; color:var(--ink-soft); margin-top:4px;">Controle Financeiro</div>
+    </div>
+    <div id="loginError" style="display:none; background:#FBE3E0; color:var(--danger); padding:10px 12px; border-radius:8px; font-size:13px; margin-bottom:14px;"></div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="seu@email.com" />
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" />
+    </div>
+    <button id="loginBtn" class="btn btn-primary" style="width:100%; margin-top:6px;">Entrar</button>
+    <div style="text-align:center; margin-top:14px;">
+      <span style="font-size:13px; color:var(--ink-soft);">Não tem conta? </span>
+      <button id="showRegisterBtn" style="background:none; border:none; color:var(--brand-dark); font-size:13px; font-weight:600; cursor:pointer;">Cadastrar</button>
+    </div>
+
+    <div id="registerForm" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--line);">
+      <div class="field">
+        <label>Nome</label>
+        <input type="text" id="registerName" placeholder="Seu nome" />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="registerEmail" placeholder="seu@email.com" />
+      </div>
+      <div class="field">
+        <label>Senha</label>
+        <input type="password" id="registerPassword" placeholder="mínimo 6 caracteres" />
+      </div>
+      <button id="registerBtn" class="btn btn-primary" style="width:100%;">Criar conta</button>
+      <button id="hideRegisterBtn" style="width:100%; margin-top:8px; background:none; border:none; color:var(--ink-soft); font-size:13px; cursor:pointer;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="mark">Raspael</span>
+    <span class="sub">Controle Financeiro</span>
+  </div>
+  <div class="nav-tabs" id="navTabs">
+    <button data-page="agenda" class="active">Agenda</button>
+    <button data-page="relatorios">Relatórios</button>
+    <button data-page="config">Configurações</button>
+  </div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span id="userNameLabel" style="font-size:12.5px; opacity:0.75;"></span>
+    <button id="logoutBtn" style="background:rgba(255,255,255,0.12); border:none; color:#fff; padding:6px 12px; border-radius:6px; font-size:12.5px; cursor:pointer;">Sair</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- AGENDA PAGE -->
+  <div id="page-agenda">
+    <div class="week-nav">
+      <div class="ctrl">
+        <button class="iconbtn" id="prevWeek">‹</button>
+        <div>
+          <div class="week-label" id="weekLabel">Semana</div>
+          <div class="week-range" id="weekRange">—</div>
+        </div>
+        <button class="iconbtn" id="nextWeek">›</button>
+      </div>
+      <div class="ctrl">
+        <button class="today-btn" id="todayBtn">Hoje</button>
+        <select class="month-select" id="monthJump"></select>
+      </div>
+    </div>
+
+    <div class="goal-panel">
+      <div class="goal-left">
+        <div class="eyebrow">Meta semanal</div>
+        <div class="goal-figures">
+          <div class="fig"><div class="num" id="goalFaturado">R$ 0</div><div class="lbl">Faturado</div></div>
+          <div class="fig"><div class="num" id="goalFaltam">R$ 0</div><div class="lbl">Faltam</div></div>
+          <div class="fig"><div class="num" id="goalMeta">R$ 0</div><div class="lbl">Meta</div></div>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="progress-pct" id="progressPct">0% da meta atingida</div>
+      </div>
+      <div class="goal-right">
+        <div class="ind-row"><span>Atendimentos na semana</span><b id="indQtd">0</b></div>
+        <div class="ind-row"><span>Média por atendimento</span><b id="indMedia">R$ 0</b></div>
+        <div class="ind-row"><span>Melhor dia</span><b id="indMelhorDia">—</b></div>
+        <div class="projection-msg" id="projectionMsg">Registre atendimentos para ver a projeção da semana.</div>
+      </div>
+    </div>
+
+    <div class="legend" id="legendWrap"></div>
+
+    <div class="grid-wrap">
+      <table class="grid" id="gridTable"></table>
+    </div>
+
+    <div class="week-summary-bar">
+      <div class="item"><div class="num" id="weekTotalQtd">0</div><div class="lbl">Atendimentos</div></div>
+      <div class="item"><div class="num" id="weekTotalReceita">R$ 0</div><div class="lbl">Receita da semana</div></div>
+    </div>
+  </div>
+
+  <!-- RELATORIOS PAGE -->
+  <div id="page-relatorios" style="display:none;">
+    <div class="week-nav">
+      <div class="ctrl">
+        <span style="font-family:'Fraunces',serif; font-weight:600; font-size:16px;" id="reportMonthLabel">Mês</span>
+      </div>
+      <div class="ctrl">
+        <button class="iconbtn" id="prevMonthR">‹</button>
+        <select class="month-select" id="monthJumpR"></select>
+        <button class="iconbtn" id="nextMonthR">›</button>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <h2>Resumo mensal</h2>
+      <div class="month-stats">
+        <div class="stat-box"><div class="num" id="mTotal">0</div><div class="lbl">Atendimentos no mês</div></div>
+        <div class="stat-box"><div class="num" id="mReceita">R$ 0</div><div class="lbl">Receita do mês</div></div>
+        <div class="stat-box"><div class="num" id="mMediaDiaria">R$ 0</div><div class="lbl">Média diária</div></div>
+        <div class="stat-box"><div class="num" id="mMelhorDia">—</div><div class="lbl">Melhor dia da semana</div></div>
+        <div class="stat-box"><div class="num" id="mMelhorSemana">—</div><div class="lbl">Melhor semana do mês</div></div>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <h2>Resumo por plataforma</h2>
+      <div class="cards-row" id="platformCards"></div>
+      <div class="chart-card" style="margin-top:14px;">
+        <h4>Total de horas trabalhadas por semana</h4>
+        <canvas id="chartHours"></canvas>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <h2>Gráficos</h2>
+      <div class="chart-card"><h4>Receita por semana</h4><canvas id="chartWeek"></canvas></div>
+      <div class="chart-card"><h4>Receita por plataforma</h4><canvas id="chartPlatform"></canvas></div>
+      <div class="chart-card"><h4>Evolução do faturamento mensal</h4><canvas id="chartMonthly"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CONFIG PAGE -->
+  <div id="page-config" style="display:none;">
+    <div class="settings-card" style="margin-bottom:16px;">
+      <h4>Meta semanal</h4>
+      <div class="meta-edit">
+        <span>R$</span>
+        <input type="number" id="metaInput" />
+      </div>
+    </div>
+    <div class="settings-grid" id="settingsGrid"></div>
+    <button class="add-val-btn" id="addPlatformBtn" style="margin-top:14px; padding:12px;">+ adicionar plataforma</button>
+    <div class="save-settings-bar"><button class="btn btn-primary" style="flex:0 0 auto; padding:11px 22px;" id="saveSettingsBtn">Salvar configurações</button></div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="close-x" id="modalClose">✕</button>
+    <h3 id="modalTitle">Novo atendimento</h3>
+    <div class="modal-sub" id="modalSub">—</div>
+
+    <div class="field" id="typeField">
+      <label>Tipo</label>
+      <div class="platform-options" style="grid-template-columns:repeat(2,1fr);" id="typeOptions">
+        <div class="platform-opt sel-tipo-atendimento active" data-t="atendimento">Atendimento</div>
+        <div class="platform-opt sel-tipo-evento" data-t="evento">Evento</div>
+      </div>
+    </div>
+
+    <div class="field" id="platformField">
+      <label>Plataforma</label>
+      <div class="platform-options" id="platformOptions"></div>
+    </div>
+
+    <div class="field" id="clientNameField" style="display:none;">
+      <label>Nome do cliente</label>
+      <input type="text" id="clientNameInput" placeholder="Ex: Maria Silva" />
+    </div>
+
+    <div class="field" id="eventNameField" style="display:none;">
+      <label>Nome do evento</label>
+      <input type="text" id="eventNameInput" placeholder="Ex: Evento XYZ" />
+    </div>
+
+    <div class="field" id="recurrenceField">
+      <label>Recorrência</label>
+      <select class="std" id="recurrenceSelect">
+        <option value="none">Ocorrência única</option>
+        <option value="weekly">Semanal</option>
+        <option value="biweekly">Quinzenal</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label id="dateTimeLabel">Dia e horário</label>
+      <div style="display:flex; gap:8px;">
+        <input type="date" id="apptDate" style="flex:1.4;" />
+        <select class="std" id="apptTime" style="flex:1;"></select>
+        <select class="std" id="apptEndTime" style="flex:1; display:none;"></select>
+      </div>
+      <div class="modal-sub" id="rescheduleHint" style="margin:6px 0 0; display:none;">Alterar a data ou o horário move apenas este atendimento, como num reagendamento.</div>
+    </div>
+
+    <div class="field" id="valueField">
+      <label>Valor</label>
+      <div class="value-chips" id="valueChips"></div>
+      <input type="number" id="customValue" placeholder="Outro valor (R$)" step="0.01" />
+    </div>
+
+    <div class="field" id="statusField" style="display:none;">
+      <label>Status</label>
+      <button id="faltaBtn" style="width:100%; padding:10px; border-radius:8px; border:1.5px solid var(--danger); background:#fff; color:var(--danger); cursor:pointer; font-size:13px; font-weight:700;">✗ Marcar como Falta</button>
+      <div style="font-size:11px; color:var(--ink-soft); margin-top:5px;">Atendimentos passados são automaticamente considerados realizados. Marque como falta apenas quando o cliente não compareceu.</div>
+    </div>
+
+    <div class="field" id="obsFieldWrap">
+      <label>Observação (opcional)</label>
+      <textarea id="obsField" placeholder="Anotações..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-danger" id="deleteBtn" style="display:none;">Excluir</button>
+      <button class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+      <button class="btn btn-primary" id="saveBtn">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="loadingOverlay" style="position:fixed;inset:0;background:var(--brand-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;color:#fff;gap:16px;">
+  <div style="font-family:'Fraunces',serif;font-size:26px;font-weight:700;">Raspael</div>
+  <div style="font-size:13px;opacity:0.7;">Carregando seus dados...</div>
+  <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;"></div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+
+<div class="modal-overlay" id="scopeOverlay">
+  <div class="modal" style="max-width:360px;">
+    <h3 id="scopeTitle" style="margin-bottom:6px;">Este registro é recorrente</h3>
+    <div class="modal-sub" id="scopeSub" style="margin-bottom:16px;">O que você deseja fazer?</div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <button class="btn btn-secondary" id="scopeSingle" style="text-align:left; padding:12px 14px;">Apenas este</button>
+      <button class="btn btn-secondary" id="scopeForward" style="text-align:left; padding:12px 14px;">Este e os seguintes</button>
+      <button class="btn btn-secondary" id="scopeAll" style="text-align:left; padding:12px 14px;">Toda a série</button>
+      <button class="btn-danger" id="scopeCancel" style="margin-top:4px;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script>
+/* ============ CONSTANTS ============ */
+const DAYS = ['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const DAYS_SHORT = ['Seg','Ter','Qua','Qui','Sex','Sáb'];
+const HOURS = [];
+for(let h=7; h<=22; h++) HOURS.push(String(h).padStart(2,'0')+':00');
+const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function tintColor(hex, ratio){
+  hex = (hex||'#999999').replace('#','');
+  if(hex.length===3) hex = hex.split('').map(c=>c+c).join('');
+  const r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
+  const mix = (c)=> Math.round(c + (255-c)*ratio);
+  return `rgb(${mix(r)},${mix(g)},${mix(b)})`;
+}
+function getPlatform(id){
+  return (CONFIG.platforms||[]).find(p=>p.id===id) || {id, label:id||'—', color:'#8A8A8A'};
+}
+
+let DEFAULT_CONFIG = {
+  meta: 2500,
+  platforms: [
+    { id:'particular', label:'Particular', color:'#1B2A4A', values:[70,100,125,150] },
+    { id:'plataforma1', label:'Plataforma 1', color:'#2F6FED', values:[40,50,60,70] },
+    { id:'plataforma2', label:'Plataforma 2', color:'#F0791F', values:[50,70,80,100] },
+    { id:'plataforma3', label:'Plataforma 3', color:'#2E9D5C', values:[25,50] }
+  ]
+};
+
+let CONFIG = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+let APPTS = {}; // key: "YYYY-MM-DD|HH:MM" -> {platform, value, obs}
+let currentMonday = getMonday(new Date());
+let currentPage = 'agenda';
+let editingKey = null;
+let scopeMode = 'delete';
+let pendingEventEdit = null;
+let selectedPlatform = 'particular';
+let selectedValue = null;
+let reportMonth = new Date().getMonth();
+let reportYear = new Date().getFullYear();
+let chartsInstances = {};
+
+/* ============ STORAGE — Firebase com fallback para localStorage ============ */
+const LS_CONFIG_KEY = 'raspael_config_v1';
+const LS_APPTS_KEY  = 'raspael_appointments_v1';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBFecB2R7fLhQjzX2ZBw2mSj5RnaGW3Lmo",
+  authDomain: "raspael-financeiro.firebaseapp.com",
+  projectId: "raspael-financeiro",
+  storageBucket: "raspael-financeiro.firebasestorage.app",
+  messagingSenderId: "551742973597",
+  appId: "1:551742973597:web:01a188a033fa345fbc5674"
+};
+
+let DOC_CONFIG = null, DOC_APPTS = null;
+let useFirebase = false;
+let currentUser = null;
+
+try{
+  if(typeof firebase !== 'undefined'){
+    firebase.initializeApp(firebaseConfig);
+    useFirebase = true;
+  }
+}catch(e){ console.warn('Firebase indisponível:', e); }
+
+function setUserDocs(uid){
+  const db = firebase.firestore();
+  DOC_CONFIG = db.collection('users').doc(uid).collection('raspael').doc('config');
+  DOC_APPTS  = db.collection('users').doc(uid).collection('raspael').doc('appointments');
+}
+
+function migrateConfig(){
+  if(!CONFIG.platforms){
+    const ll={particular:'Particular',zenklub:'Zenklub',vitude:'Vittude',docway:'DocWay'};
+    const lc={particular:'#1B2A4A',zenklub:'#2F6FED',vitude:'#F0791F',docway:'#2E9D5C'};
+    const lv=CONFIG.values||DEFAULT_CONFIG.platforms.reduce((o,p)=>{o[p.id]=p.values;return o;},{});
+    CONFIG.platforms=Object.keys(lv).map(id=>({id,label:ll[id]||id,color:lc[id]||'#6B7280',values:lv[id]}));
+    delete CONFIG.values;
+  }
+}
+
+async function loadData(){
+  if(useFirebase && DOC_CONFIG){
+    const t = ms => new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms));
+    try{
+      const snap = await Promise.race([DOC_CONFIG.get(), t(5000)]);
+      if(snap.exists) CONFIG = JSON.parse(snap.data().payload||'{}') || DEFAULT_CONFIG;
+    }catch(e){ console.warn('Config Firebase erro:', e.message); }
+    migrateConfig();
+    try{
+      const snap = await Promise.race([DOC_APPTS.get(), t(5000)]);
+      if(snap.exists) APPTS = JSON.parse(snap.data().payload||'{}') || {};
+    }catch(e){ console.warn('Appts Firebase erro:', e.message); APPTS={}; }
+  } else {
+    try{ const c=localStorage.getItem(LS_CONFIG_KEY); if(c) CONFIG=JSON.parse(c); }catch(e){}
+    migrateConfig();
+    try{ const a=localStorage.getItem(LS_APPTS_KEY); if(a) APPTS=JSON.parse(a); }catch(e){ APPTS={}; }
+  }
+}
+
+async function saveConfig(){
+  if(useFirebase && DOC_CONFIG){
+    try{ await DOC_CONFIG.set({ payload: JSON.stringify(CONFIG) }); }
+    catch(e){ showToast('Erro ao salvar configurações'); }
+  } else {
+    try{ localStorage.setItem(LS_CONFIG_KEY, JSON.stringify(CONFIG)); }catch(e){}
+  }
+}
+
+async function saveAppts(){
+  if(useFirebase && DOC_APPTS){
+    try{ await DOC_APPTS.set({ payload: JSON.stringify(APPTS) }); }
+    catch(e){ showToast('Erro ao salvar dados'); }
+  } else {
+    try{ localStorage.setItem(LS_APPTS_KEY, JSON.stringify(APPTS)); }catch(e){}
+  }
+}
+
+/* ============ AUTH UI ============ */
+function showLoginScreen(){ document.getElementById('loginScreen').style.display='flex'; }
+function hideLoginScreen(){ document.getElementById('loginScreen').style.display='none'; }
+function showLoginError(msg){ const el=document.getElementById('loginError'); el.textContent=msg; el.style.display='block'; }
+function hideLoginError(){ document.getElementById('loginError').style.display='none'; }
+
+document.getElementById('showRegisterBtn').addEventListener('click',()=>{
+  document.getElementById('registerForm').style.display='';
+  document.getElementById('showRegisterBtn').style.display='none';
+  hideLoginError();
+});
+document.getElementById('hideRegisterBtn').addEventListener('click',()=>{
+  document.getElementById('registerForm').style.display='none';
+  document.getElementById('showRegisterBtn').style.display='';
+  hideLoginError();
+});
+
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  if(!email||!pass){ showLoginError('Preencha email e senha.'); return; }
+  try{
+    await firebase.auth().signInWithEmailAndPassword(email, pass);
+  }catch(e){
+    const msgs = {
+      'auth/user-not-found':'Usuário não encontrado.',
+      'auth/wrong-password':'Senha incorreta.',
+      'auth/invalid-email':'Email inválido.',
+      'auth/invalid-credential':'Email ou senha incorretos.'
+    };
+    showLoginError(msgs[e.code]||'Erro ao entrar. Tente novamente.');
+  }
+});
+
+document.getElementById('registerBtn').addEventListener('click', async ()=>{
+  const name  = document.getElementById('registerName').value.trim();
+  const email = document.getElementById('registerEmail').value.trim();
+  const pass  = document.getElementById('registerPassword').value;
+  if(!name||!email||!pass){ showLoginError('Preencha todos os campos.'); return; }
+  if(pass.length < 6){ showLoginError('A senha deve ter ao menos 6 caracteres.'); return; }
+  try{
+    const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
+    await cred.user.updateProfile({ displayName: name });
+  }catch(e){
+    const msgs = {
+      'auth/email-already-in-use':'Este email já está cadastrado.',
+      'auth/invalid-email':'Email inválido.',
+      'auth/weak-password':'Senha muito fraca.'
+    };
+    showLoginError(msgs[e.code]||'Erro ao cadastrar. Tente novamente.');
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  if(useFirebase) await firebase.auth().signOut();
+  APPTS = {}; CONFIG = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  showLoginScreen();
+});
+
+
+/* ============ HELPERS ============ */
+function getMonday(d){
+  const date = new Date(d);
+  const day = date.getDay(); // 0 sun .. 6 sat
+  const diff = (day === 0 ? -6 : 1) - day;
+  date.setDate(date.getDate() + diff);
+  date.setHours(0,0,0,0);
+  return date;
+}
+function fmtDate(d){
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function fmtDateShort(d){
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function fmtMoney(v){
+  return 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtMoneyShort(v){
+  return 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+}
+function weekDates(monday){
+  const arr = [];
+  for(let i=0;i<6;i++){ const d = new Date(monday); d.setDate(monday.getDate()+i); arr.push(d); }
+  return arr;
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+/* ============ NAV TABS ============ */
+document.getElementById('navTabs').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-page]');
+  if(!btn) return;
+  document.querySelectorAll('#navTabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentPage = btn.dataset.page;
+  document.getElementById('page-agenda').style.display = currentPage==='agenda' ? '' : 'none';
+  document.getElementById('page-relatorios').style.display = currentPage==='relatorios' ? '' : 'none';
+  document.getElementById('page-config').style.display = currentPage==='config' ? '' : 'none';
+  if(currentPage==='relatorios') renderReports();
+  if(currentPage==='config') renderSettings();
+});
+
+/* ============ MONTH JUMP DROPDOWNS ============ */
+function populateMonthSelect(sel, withYearRange){
+  sel.innerHTML = '';
+  const now = new Date();
+  for(let y=now.getFullYear()-1; y<=now.getFullYear()+1; y++){
+    for(let m=0;m<12;m++){
+      const opt = document.createElement('option');
+      opt.value = `${y}-${m}`;
+      opt.textContent = `${MONTH_NAMES[m]} ${y}`;
+      sel.appendChild(opt);
+    }
+  }
+}
+populateMonthSelect(document.getElementById('monthJump'));
+populateMonthSelect(document.getElementById('monthJumpR'));
+(function populateTimeSelect(){
+  const sel = document.getElementById('apptTime');
+  const endSel = document.getElementById('apptEndTime');
+  const END_HOURS = HOURS.concat(['23:00']);
+  HOURS.forEach(h=>{
+    const opt = document.createElement('option');
+    opt.value = h; opt.textContent = h;
+    sel.appendChild(opt);
+  });
+  END_HOURS.forEach(h=>{
+    const opt = document.createElement('option');
+    opt.value = h; opt.textContent = h;
+    endSel.appendChild(opt);
+  });
+})();
+function genId(){ return 'r' + Date.now() + Math.random().toString(36).slice(2,8); }
+let currentType = 'atendimento';
+function getApptStatus(key){
+  // Status is auto: past/current hour = realizado, future = agendado
+  // Manual override stored in appt.status ('falta') is respected
+  const appt = APPTS[key];
+  if(appt && appt.status === 'falta') return 'falta';
+  const [dateStr, hour] = key.split('|');
+  const apptTime = new Date(`${dateStr}T${hour}:00`);
+  return apptTime <= new Date() ? 'realizado' : 'agendado';
+}
+
+document.getElementById('monthJump').addEventListener('change', (e)=>{
+  const [y,m] = e.target.value.split('-').map(Number);
+  currentMonday = getMonday(new Date(y, m, 1));
+  renderAgenda();
+});
+document.getElementById('monthJumpR').addEventListener('change', (e)=>{
+  const [y,m] = e.target.value.split('-').map(Number);
+  reportYear = y; reportMonth = m;
+  renderReports();
+});
+
+/* ============ WEEK NAV ============ */
+document.getElementById('prevWeek').addEventListener('click', ()=>{
+  currentMonday.setDate(currentMonday.getDate()-7);
+  renderAgenda();
+});
+document.getElementById('nextWeek').addEventListener('click', ()=>{
+  currentMonday.setDate(currentMonday.getDate()+7);
+  renderAgenda();
+});
+document.getElementById('todayBtn').addEventListener('click', ()=>{
+  currentMonday = getMonday(new Date());
+  renderAgenda();
+});
+document.getElementById('prevMonthR').addEventListener('click', ()=>{
+  reportMonth--; if(reportMonth<0){reportMonth=11; reportYear--;}
+  renderReports();
+});
+document.getElementById('nextMonthR').addEventListener('click', ()=>{
+  reportMonth++; if(reportMonth>11){reportMonth=0; reportYear++;}
+  renderReports();
+});
+
+/* ============ RENDER AGENDA ============ */
+function renderAgenda(){
+  renderLegend();
+  const dates = weekDates(currentMonday);
+  document.getElementById('monthJump').value = `${currentMonday.getFullYear()}-${currentMonday.getMonth()}`;
+  document.getElementById('weekLabel').textContent = `${MONTH_NAMES[dates[0].getMonth()]} ${dates[0].getFullYear()}`;
+  document.getElementById('weekRange').textContent = `${fmtDateShort(dates[0])} — ${fmtDateShort(dates[5])}`;
+
+  // build table
+  const table = document.getElementById('gridTable');
+  let html = '<thead><tr><th style="width:64px;"></th>';
+  DAYS.forEach((d,i)=>{
+    html += `<th>${d}<span class="date-sub">${fmtDateShort(dates[i])}</span></th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  HOURS.forEach(hour=>{
+    html += `<tr><td class="time-col">${hour}</td>`;
+    dates.forEach(date=>{
+      const key = `${fmtDate(date)}|${hour}`;
+      const appt = APPTS[key];
+      if(appt && appt.type !== 'evento'){
+        const cfg = getPlatform(appt.platform);
+        const status = getApptStatus(key);
+        const isFalta = status === 'falta';
+        const isAgendado = status === 'agendado';
+        const bg = isFalta ? '#FBE3E0' : tintColor(cfg.color, isAgendado ? 0.93 : 0.85);
+        const txt = isFalta ? 'var(--danger)' : cfg.color;
+        const opacity = isAgendado ? '0.65' : '1';
+        const label = (appt.platform === 'particular' && appt.clientName) ? appt.clientName : cfg.label;
+        const statusIcon = isFalta ? ' ✗' : (isAgendado ? '' : ' ✓');
+        html += `<td class="cell filled" data-key="${key}" style="opacity:${opacity}">
+          <div class="cell-inner" style="background:${bg}; border-left: 3px solid ${isFalta ? 'var(--danger)' : cfg.color};">
+            <span class="cell-platform" style="color:${txt}">${label}${appt.recurrenceId ? ' ↻' : ''}${statusIcon}</span>
+            <span class="cell-value" style="color:${txt}">${isFalta ? 'Falta' : (appt.value===0?'Zero':fmtMoney(appt.value))}</span>
+          </div>
+        </td>`;
+      } else if(appt && appt.type === 'evento'){
+        html += `<td class="cell filled" data-key="${key}">
+          <div class="cell-inner" style="background:var(--evento-bg);">
+            <span class="cell-platform" style="color:var(--evento)">${appt.isStart ? '' : '↳ '}${appt.name}</span>
+            ${appt.isStart ? `<span class="cell-value" style="color:var(--evento)">${appt.startTime}–${appt.endTime}</span>` : ''}
+          </div>
+        </td>`;
+      } else {
+        html += `<td class="cell empty" data-key="${key}"><div class="cell-plus">+</div></td>`;
+      }
+    });
+    html += '</tr>';
+  });
+
+  // totals row
+  html += '<tr class="row-total"><td class="time-col">Total</td>';
+  dates.forEach(date=>{
+    const realized = getApptsForDate(date);
+    const all = getAllApptsForDate(date);
+    const agendados = all.filter(a=> getApptStatus(a._key) === 'agendado').length;
+    const receita = realized.reduce((s,a)=>s+a.value,0);
+    const agendadoStr = agendados > 0 ? `<span style="opacity:.6;font-size:10px;">(+${agendados} ag.)</span>` : '';
+    html += `<td class="day-total-cell">${realized.length} real. ${agendadoStr}<span class="amt">${fmtMoney(receita)}</span></td>`;
+  });
+  html += '</tr></tbody>';
+  table.innerHTML = html;
+
+  // bind cells
+  table.querySelectorAll('td.cell').forEach(td=>{
+    td.addEventListener('click', ()=>openModal(td.dataset.key));
+  });
+
+  // week summary + goal panel
+  const weekAppts = dates.flatMap(d=>getApptsForDate(d));
+  const totalQtd = weekAppts.length;
+  const totalReceita = weekAppts.reduce((s,a)=>s+a.value,0);
+  document.getElementById('weekTotalQtd').textContent = totalQtd;
+  document.getElementById('weekTotalReceita').textContent = fmtMoney(totalReceita);
+
+  const meta = CONFIG.meta;
+  const faltam = Math.max(meta - totalReceita, 0);
+  const pct = meta>0 ? Math.min((totalReceita/meta)*100, 999) : 0;
+  document.getElementById('goalFaturado').textContent = fmtMoneyShort(totalReceita);
+  document.getElementById('goalFaltam').textContent = fmtMoneyShort(faltam);
+  document.getElementById('goalMeta').textContent = fmtMoneyShort(meta);
+  document.getElementById('progressFill').style.width = Math.min(pct,100)+'%';
+  document.getElementById('progressPct').textContent = `${pct.toFixed(0)}% da meta atingida`;
+
+  document.getElementById('indQtd').textContent = totalQtd;
+  const media = totalQtd>0 ? totalReceita/totalQtd : 0;
+  document.getElementById('indMedia').textContent = fmtMoney(media);
+
+  // melhor dia da semana
+  let bestDay = null, bestVal = -1;
+  dates.forEach((d,i)=>{
+    const v = getApptsForDate(d).reduce((s,a)=>s+a.value,0);
+    if(v>bestVal){ bestVal=v; bestDay = DAYS_SHORT[i]; }
+  });
+  document.getElementById('indMelhorDia').textContent = bestVal>0 ? `${bestDay} (${fmtMoneyShort(bestVal)})` : '—';
+
+  // projeção
+  const today = new Date(); today.setHours(0,0,0,0);
+  const isCurrentWeek = dates.some(d=>fmtDate(d)===fmtDate(today));
+  let projMsg = '';
+  if(isCurrentWeek && totalQtd>0){
+    const todayStr = fmtDate(today);
+    // Days elapsed so far this week (Mon to today, max 6)
+    const daysElapsed = Math.max(dates.filter(d=>fmtDate(d)<=todayStr).length, 1);
+    const dailyAvg = totalReceita / daysElapsed;
+    const projection = Math.round(dailyAvg * 6);
+
+    if(daysElapsed < 2){
+      // Too early in the week for a meaningful projection
+      projMsg = `Início de semana — projeção disponível a partir de terça-feira.`;
+    } else if(projection >= meta){
+      projMsg = `Se mantiver a média atual, a previsão de faturamento da semana é ${fmtMoney(projection)} — acima da meta! 🎯`;
+    } else {
+      projMsg = `Ritmo atual abaixo da meta semanal. Previsão: ${fmtMoney(projection)} (faltariam ${fmtMoney(meta-projection)}).`;
+    }
+  } else if(totalQtd===0){
+    projMsg = 'Registre atendimentos para ver a projeção da semana.';
+  } else {
+    projMsg = 'Visualizando uma semana passada ou futura.';
+  }
+  document.getElementById('projectionMsg').textContent = projMsg;
+}
+
+function renderLegend(){
+  const wrap = document.getElementById('legendWrap');
+  wrap.innerHTML = '';
+  (CONFIG.platforms||[]).forEach(p=>{
+    wrap.insertAdjacentHTML('beforeend', `<div class="chip"><span class="dot" style="background:${p.color}"></span>${p.label}</div>`);
+  });
+  wrap.insertAdjacentHTML('beforeend', `<div class="chip"><span class="dot" style="background:var(--evento)"></span>Evento</div>`);
+}
+
+function getApptsForDate(date){
+  const ds = fmtDate(date);
+  const out = [];
+  Object.keys(APPTS).forEach(key=>{
+    const a = APPTS[key];
+    if(key.startsWith(ds+'|') && a.type !== 'evento' && getApptStatus(key) === 'realizado') out.push(a);
+  });
+  return out;
+}
+function getAllApptsForDate(date){
+  const ds = fmtDate(date);
+  const out = [];
+  Object.keys(APPTS).forEach(key=>{
+    const a = APPTS[key];
+    if(key.startsWith(ds+'|') && a.type !== 'evento') out.push({...a, _key: key});
+  });
+  return out;
+}
+
+/* ============ MODAL ============ */
+function setModalType(type){
+  currentType = type;
+  document.querySelectorAll('#typeOptions .platform-opt').forEach(el=>{
+    el.classList.toggle('active', el.dataset.t === type);
+  });
+  const isEvent = type === 'evento';
+  document.getElementById('platformField').style.display = isEvent ? 'none' : '';
+  document.getElementById('clientNameField').style.display = (isEvent || selectedPlatform !== 'particular') ? 'none' : '';
+  document.getElementById('eventNameField').style.display = isEvent ? '' : 'none';
+  document.getElementById('valueField').style.display = isEvent ? 'none' : '';
+  document.getElementById('apptEndTime').style.display = isEvent ? '' : 'none';
+  document.getElementById('dateTimeLabel').textContent = isEvent ? 'Dia, início e fim' : 'Dia e horário';
+}
+document.getElementById('typeOptions').addEventListener('click', (e)=>{
+  if(document.getElementById('typeOptions').classList.contains('locked')) return;
+  const opt = e.target.closest('.platform-opt');
+  if(!opt) return;
+  setModalType(opt.dataset.t);
+});
+
+function openModal(key){
+  editingKey = key;
+  const [dateStr, hour] = key.split('|');
+  const d = new Date(dateStr+'T00:00:00');
+  const dayName = DAYS[(d.getDay()===0?6:d.getDay()-1)];
+  const existing = APPTS[key];
+
+  document.getElementById('modalSub').textContent = `${dayName}, ${fmtDateShort(d)} às ${hour}`;
+  document.getElementById('deleteBtn').style.display = existing ? '' : 'none';
+  document.getElementById('customValue').value = '';
+  document.getElementById('apptDate').value = dateStr;
+  document.getElementById('rescheduleHint').style.display = existing ? '' : 'none';
+  document.getElementById('typeOptions').classList.toggle('locked', !!existing);
+  renderPlatformOptionButtons();
+
+  if(existing && existing.type === 'evento'){
+    // gather full event block to reconstruct start/end
+    const group = Object.keys(APPTS).filter(k=>APPTS[k].eventId === existing.eventId).sort();
+    const startKey = group[0], lastKey = group[group.length-1];
+    const startHour = startKey.split('|')[1];
+    const lastHour = lastKey.split('|')[1];
+    const endHour = HOURS.concat(['23:00'])[HOURS.indexOf(lastHour)+1];
+    setModalType('evento');
+    document.getElementById('modalTitle').textContent = 'Editar evento';
+    document.getElementById('eventNameInput').value = existing.name || '';
+    document.getElementById('apptTime').value = startHour;
+    document.getElementById('apptEndTime').value = endHour;
+    document.getElementById('obsField').value = existing.obs || '';
+  } else {
+    setModalType('atendimento');
+    document.getElementById('modalTitle').textContent = existing ? 'Editar atendimento' : 'Novo registro';
+    document.getElementById('apptTime').value = hour;
+    document.getElementById('apptEndTime').value = HOURS.concat(['23:00'])[HOURS.indexOf(hour)+1] || '23:00';
+    document.getElementById('eventNameInput').value = '';
+    document.getElementById('obsField').value = existing ? (existing.obs||'') : '';
+    document.getElementById('clientNameInput').value = existing ? (existing.clientName||'') : '';
+    selectedPlatform = existing ? existing.platform : 'particular';
+    selectedValue = existing ? existing.value : null;
+    currentStatus = existing ? (existing.status||'agendado') : 'agendado';
+    const isPast = new Date(`${dateStr}T${hour}:00`) <= new Date();
+    const isFalta = existing && existing.status === 'falta';
+    const statusField = document.getElementById('statusField');
+    const faltaBtn = document.getElementById('faltaBtn');
+    if(existing && isPast){
+      statusField.style.display = '';
+      if(isFalta){
+        faltaBtn.textContent = '↩ Desfazer Falta';
+        faltaBtn.style.background = '#FBE3E0';
+      } else {
+        faltaBtn.textContent = '✗ Marcar como Falta';
+        faltaBtn.style.background = '#fff';
+      }
+    } else {
+      statusField.style.display = 'none';
+    }
+    renderPlatformOptions();
+    renderValueChips();
+    toggleClientNameField();
+  }
+
+  // recurrence selector only makes sense when creating a brand new event
+  document.getElementById('recurrenceField').style.display = existing ? 'none' : '';
+  document.getElementById('recurrenceSelect').value = 'none';
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  editingKey = null;
+}
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id==='modalOverlay') closeModal();
+});
+document.getElementById('scopeOverlay').addEventListener('click', (e)=>{
+  if(e.target.id==='scopeOverlay'){ e.currentTarget.classList.remove('open'); pendingEventEdit = null; }
+});
+
+function renderPlatformOptionButtons(){
+  const wrap = document.getElementById('platformOptions');
+  wrap.innerHTML = '';
+  (CONFIG.platforms||[]).forEach(p=>{
+    const el = document.createElement('div');
+    el.className = 'platform-opt';
+    el.dataset.p = p.id;
+    el.textContent = p.label;
+    el.addEventListener('click', ()=>{
+      selectedPlatform = p.id;
+      selectedValue = null;
+      document.getElementById('customValue').value = '';
+      renderPlatformOptions();
+      renderValueChips();
+      toggleClientNameField();
+    });
+    wrap.appendChild(el);
+  });
+}
+function toggleClientNameField(){
+  document.getElementById('clientNameField').style.display = (selectedPlatform === 'particular') ? '' : 'none';
+}
+function renderPlatformOptions(){
+  document.querySelectorAll('#platformOptions .platform-opt').forEach(el=>{
+    const active = el.dataset.p === selectedPlatform;
+    const cfg = getPlatform(el.dataset.p);
+    el.classList.toggle('active', active);
+    if(active){
+      el.style.background = tintColor(cfg.color, 0.85);
+      el.style.borderColor = cfg.color;
+      el.style.color = cfg.color;
+    } else {
+      el.style.background = ''; el.style.borderColor = ''; el.style.color = '';
+    }
+  });
+}
+
+function renderValueChips(){
+  const wrap = document.getElementById('valueChips');
+  wrap.innerHTML = '';
+  const vals = getPlatform(selectedPlatform).values || [];
+  vals.forEach(v=>{
+    const chip = document.createElement('div');
+    chip.className = 'value-chip' + (selectedValue===v ? ' active':'');
+    chip.textContent = fmtMoney(v);
+    chip.addEventListener('click', ()=>{
+      selectedValue = v;
+      document.getElementById('customValue').value = '';
+      renderValueChips();
+    });
+    wrap.appendChild(chip);
+  });
+}
+document.getElementById('customValue').addEventListener('input', (e)=>{
+  if(e.target.value !== ''){
+    selectedValue = parseFloat(e.target.value);
+    renderValueChips();
+  }
+});
+
+function clearEventGroup(eventId){
+  Object.keys(APPTS).forEach(k=>{ if(APPTS[k].eventId === eventId) delete APPTS[k]; });
+}
+
+document.getElementById('faltaBtn').addEventListener('click', async ()=>{
+  const appt = APPTS[editingKey];
+  if(!appt) return;
+  if(appt.status === 'falta'){
+    delete appt.status; // undo falta → back to auto (realizado)
+  } else {
+    appt.status = 'falta';
+  }
+  await saveAppts();
+  closeModal();
+  renderAgenda();
+  showToast(appt.status === 'falta' ? 'Marcado como falta' : 'Falta desfeita');
+});
+
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
+  const newDate = document.getElementById('apptDate').value;
+  const newTime = document.getElementById('apptTime').value;
+  if(!newDate || !newTime){ showToast('Informe a data e o horário'); return; }
+  const existing = APPTS[editingKey];
+  const obs = document.getElementById('obsField').value.trim();
+  const isEvent = currentType === 'evento';
+
+  if(isEvent){
+    const endTime = document.getElementById('apptEndTime').value;
+    const name = document.getElementById('eventNameInput').value.trim();
+    if(!name){ showToast('Dê um nome para o evento'); return; }
+    const ALL_HOURS = HOURS.concat(['23:00']);
+    const startIdx = ALL_HOURS.indexOf(newTime), endIdx = ALL_HOURS.indexOf(endTime);
+    if(endIdx <= startIdx){ showToast('O horário final deve ser depois do início'); return; }
+    const slotHours = ALL_HOURS.slice(startIdx, endIdx); // hours occupied (each 1h block, end-exclusive)
+
+    if(existing){
+      if(existing.recurrenceId){
+        // recurring event: ask scope before applying the edit
+        pendingEventEdit = { oldEventId: existing.eventId, recurrenceId: existing.recurrenceId, originalDate: editingKey.split('|')[0], newDate, newTime, endTime, slotHours, name, obs };
+        scopeMode = 'edit';
+        document.getElementById('scopeTitle').textContent = 'Este evento é recorrente';
+        document.getElementById('scopeSub').textContent = 'O que você deseja alterar?';
+        document.getElementById('scopeOverlay').classList.add('open');
+        return;
+      }
+      // editing/rescheduling a single, non-recurring event occurrence
+      const oldEventId = existing.eventId;
+      const oldKeys = new Set(Object.keys(APPTS).filter(k=>APPTS[k].eventId===oldEventId));
+      for(const h of slotHours){
+        const k = `${newDate}|${h}`;
+        if(APPTS[k] && !oldKeys.has(k)){ showToast('Horário já ocupado em ' + h); return; }
+      }
+      clearEventGroup(oldEventId);
+      slotHours.forEach((h,i)=>{
+        APPTS[`${newDate}|${h}`] = { type:'evento', name, value:0, obs, eventId: oldEventId, isStart: i===0, startTime:newTime, endTime };
+      });
+      await saveAppts(); closeModal(); renderAgenda(); showToast('Evento salvo');
+      return;
+    }
+
+    const recurrence = document.getElementById('recurrenceSelect').value;
+    const recurrenceId = recurrence === 'none' ? null : genId();
+    const step = recurrence === 'weekly' ? 7 : 14;
+    const count = recurrence === 'none' ? 1 : (recurrence === 'weekly' ? 52 : 26);
+    const base = new Date(newDate+'T00:00:00');
+    let created = 0, skippedOcc = 0;
+    for(let i=0;i<count;i++){
+      const d = new Date(base); d.setDate(base.getDate() + step*i);
+      const ds = fmtDate(d);
+      const conflict = slotHours.some(h => APPTS[`${ds}|${h}`]);
+      if(conflict){ skippedOcc++; continue; }
+      const eventId = genId();
+      slotHours.forEach((h,idx)=>{
+        APPTS[`${ds}|${h}`] = { type:'evento', name, value:0, obs, eventId, isStart: idx===0, startTime:newTime, endTime, recurrenceId };
+      });
+      created++;
+    }
+    if(skippedOcc>0) showToast(`${created} ocorrência(s) criada(s), ${skippedOcc} pulada(s) por conflito`);
+    await saveAppts(); closeModal(); renderAgenda(); showToast('Evento salvo');
+    return;
+  }
+
+  // ---- Atendimento (regular appointment) ----
+  let value = selectedValue;
+  const customVal = document.getElementById('customValue').value;
+  if(customVal !== ''){ value = parseFloat(customVal); }
+  if(value === null || value === undefined || isNaN(value)){
+    showToast('Selecione ou digite um valor');
+    return;
+  }
+  const newKey = `${newDate}|${newTime}`;
+  const clientName = document.getElementById('clientNameInput').value.trim();
+
+  if(existing){
+    if(newKey !== editingKey && APPTS[newKey]){
+      showToast('Já existe um registro nesse horário');
+      return;
+    }
+    const data = { platform: selectedPlatform, value, obs };
+    if(clientName) data.clientName = clientName;
+    if(existing.recurrenceId) data.recurrenceId = existing.recurrenceId;
+    if(existing.status) data.status = existing.status; // preserve falta if set
+    if(newKey !== editingKey) delete APPTS[editingKey];
+    APPTS[newKey] = data;
+  } else {
+    const recurrence = document.getElementById('recurrenceSelect').value;
+    if(recurrence === 'none'){
+      if(APPTS[newKey]){ showToast('Já existe um registro nesse horário'); return; }
+      const data = { platform: selectedPlatform, value, obs };
+      if(clientName) data.clientName = clientName;
+      APPTS[newKey] = data;
+    } else {
+      const step = recurrence === 'weekly' ? 7 : 14;
+      const count = recurrence === 'weekly' ? 52 : 26;
+      const recurrenceId = genId();
+      const base = new Date(newDate+'T00:00:00');
+      let created = 0, skipped = 0;
+      for(let i=0;i<count;i++){
+        const d = new Date(base);
+        d.setDate(base.getDate() + step*i);
+        const k = `${fmtDate(d)}|${newTime}`;
+        if(APPTS[k]){ skipped++; continue; }
+        const data = { platform: selectedPlatform, value, obs, recurrenceId };
+        if(clientName) data.clientName = clientName;
+        APPTS[k] = data;
+        created++;
+      }
+      if(skipped>0) showToast(`${created} atendimentos criados, ${skipped} horários já ocupados foram pulados`);
+    }
+  }
+  await saveAppts();
+  closeModal();
+  renderAgenda();
+  showToast('Atendimento salvo');
+});
+
+document.getElementById('deleteBtn').addEventListener('click', ()=>{
+  const appt = APPTS[editingKey];
+  if(!appt) return;
+  if(appt.recurrenceId){
+    scopeMode = 'delete';
+    document.getElementById('scopeTitle').textContent = appt.type==='evento' ? 'Este evento é recorrente' : 'Este atendimento é recorrente';
+    document.getElementById('scopeSub').textContent = 'O que você deseja excluir?';
+    document.getElementById('scopeOverlay').classList.add('open');
+  } else {
+    confirmDelete('single');
+  }
+});
+
+async function confirmDelete(scope){
+  const appt = APPTS[editingKey];
+  if(!appt) return;
+  if(scope === 'single'){
+    if(appt.type === 'evento'){ clearEventGroup(appt.eventId); }
+    else { delete APPTS[editingKey]; }
+  } else if(scope === 'forward'){
+    const [dateStr] = editingKey.split('|');
+    Object.keys(APPTS).forEach(k=>{
+      const a = APPTS[k];
+      if(a.recurrenceId === appt.recurrenceId && k.split('|')[0] >= dateStr) delete APPTS[k];
+    });
+  } else if(scope === 'all'){
+    Object.keys(APPTS).forEach(k=>{
+      if(APPTS[k].recurrenceId === appt.recurrenceId) delete APPTS[k];
+    });
+  }
+  await saveAppts();
+  document.getElementById('scopeOverlay').classList.remove('open');
+  closeModal();
+  renderAgenda();
+  showToast('Registro excluído');
+}
+
+async function applyEventEdit(scope){
+  const e = pendingEventEdit;
+  if(!e) return;
+
+  if(scope === 'single'){
+    const oldKeys = new Set(Object.keys(APPTS).filter(k=>APPTS[k].eventId===e.oldEventId));
+    for(const h of e.slotHours){
+      const k = `${e.newDate}|${h}`;
+      if(APPTS[k] && !oldKeys.has(k)){ showToast('Horário já ocupado em ' + h); document.getElementById('scopeOverlay').classList.remove('open'); return; }
+    }
+    clearEventGroup(e.oldEventId);
+    e.slotHours.forEach((h,i)=>{
+      APPTS[`${e.newDate}|${h}`] = { type:'evento', name:e.name, value:0, obs:e.obs, eventId:e.oldEventId, isStart:i===0, startTime:e.newTime, endTime:e.endTime, recurrenceId:e.recurrenceId };
+    });
+  } else {
+    // forward / all: keep each occurrence's own date, only update time-of-day, duration, name and obs
+    const occurrenceDates = new Set();
+    Object.keys(APPTS).forEach(k=>{
+      const a = APPTS[k];
+      if(a.recurrenceId === e.recurrenceId){
+        const ds = k.split('|')[0];
+        if(scope === 'all' || ds >= e.originalDate) occurrenceDates.add(ds);
+      }
+    });
+    let skipped = 0;
+    occurrenceDates.forEach(ds=>{
+      const eventId = genId();
+      const oldKeysForDate = new Set(Object.keys(APPTS).filter(k=>k.startsWith(ds+'|') && APPTS[k].recurrenceId===e.recurrenceId));
+      const conflict = e.slotHours.some(h=>{
+        const k = `${ds}|${h}`;
+        return APPTS[k] && !oldKeysForDate.has(k);
+      });
+      if(conflict){ skipped++; return; }
+      oldKeysForDate.forEach(k=>delete APPTS[k]);
+      e.slotHours.forEach((h,i)=>{
+        APPTS[`${ds}|${h}`] = { type:'evento', name:e.name, value:0, obs:e.obs, eventId, isStart:i===0, startTime:e.newTime, endTime:e.endTime, recurrenceId:e.recurrenceId };
+      });
+    });
+    if(skipped>0) showToast(`${skipped} ocorrência(s) não foram alteradas por conflito de horário`);
+  }
+  await saveAppts();
+  pendingEventEdit = null;
+  document.getElementById('scopeOverlay').classList.remove('open');
+  closeModal();
+  renderAgenda();
+  showToast('Evento atualizado');
+}
+
+document.getElementById('scopeSingle').addEventListener('click', ()=>{
+  if(scopeMode === 'edit') applyEventEdit('single'); else confirmDelete('single');
+});
+document.getElementById('scopeForward').addEventListener('click', ()=>{
+  if(scopeMode === 'edit') applyEventEdit('forward'); else confirmDelete('forward');
+});
+document.getElementById('scopeAll').addEventListener('click', ()=>{
+  if(scopeMode === 'edit') applyEventEdit('all'); else confirmDelete('all');
+});
+document.getElementById('scopeCancel').addEventListener('click', ()=>{
+  document.getElementById('scopeOverlay').classList.remove('open');
+  pendingEventEdit = null;
+});
+
+/* ============ REPORTS ============ */
+function renderReports(){
+  document.getElementById('monthJumpR').value = `${reportYear}-${reportMonth}`;
+  document.getElementById('reportMonthLabel').textContent = `${MONTH_NAMES[reportMonth]} ${reportYear}`;
+
+  // gather month appts (exclude events and non-realizado from revenue calcs)
+  const monthAppts = [];
+  Object.keys(APPTS).forEach(key=>{
+    const [dateStr] = key.split('|');
+    const d = new Date(dateStr+'T00:00:00');
+    const a = APPTS[key];
+    if(d.getMonth()===reportMonth && d.getFullYear()===reportYear && a.type !== 'evento' && getApptStatus(key) === 'realizado'){
+      monthAppts.push({...a, date:dateStr});
+    }
+  });
+
+  const totalQtd = monthAppts.length;
+  const totalReceita = monthAppts.reduce((s,a)=>s+a.value,0);
+  const daysInMonth = new Date(reportYear, reportMonth+1, 0).getDate();
+  const mediaDiaria = totalReceita/daysInMonth;
+
+  document.getElementById('mTotal').textContent = totalQtd;
+  document.getElementById('mReceita').textContent = fmtMoney(totalReceita);
+  document.getElementById('mMediaDiaria').textContent = fmtMoney(mediaDiaria);
+
+  // melhor dia da semana (weekday with highest total)
+  const byWeekday = [0,0,0,0,0,0,0]; // 0=Sun..6=Sat
+  const weekdayNames = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  monthAppts.forEach(a=>{
+    const d = new Date(a.date+'T00:00:00');
+    byWeekday[d.getDay()] += a.value;
+  });
+  let bestWd = 0, bestWdVal=-1;
+  byWeekday.forEach((v,i)=>{ if(v>bestWdVal){bestWdVal=v; bestWd=i;} });
+  document.getElementById('mMelhorDia').textContent = bestWdVal>0 ? weekdayNames[bestWd] : '—';
+
+  // melhor semana do mes
+  const weekTotals = {}; // monday-date-str -> total
+  monthAppts.forEach(a=>{
+    const d = new Date(a.date+'T00:00:00');
+    const mon = fmtDate(getMonday(d));
+    weekTotals[mon] = (weekTotals[mon]||0) + a.value;
+  });
+  let bestWeek = null, bestWeekVal=-1;
+  Object.keys(weekTotals).forEach(k=>{ if(weekTotals[k]>bestWeekVal){bestWeekVal=weekTotals[k]; bestWeek=k;} });
+  document.getElementById('mMelhorSemana').textContent = bestWeek ? `${fmtDateShort(new Date(bestWeek+'T00:00:00'))} (${fmtMoneyShort(bestWeekVal)})` : '—';
+
+  // platform cards
+  const cardsWrap = document.getElementById('platformCards');
+  cardsWrap.innerHTML = '';
+  (CONFIG.platforms||[]).forEach(p=>{
+    const items = monthAppts.filter(a=>a.platform===p.id);
+    const qtd = items.length;
+    const receita = items.reduce((s,a)=>s+a.value,0);
+    const ticket = qtd>0 ? receita/qtd : 0;
+    const horas = qtd; // each appointment slot occupies 1 hour of the agenda
+    const card = document.createElement('div');
+    card.className = 'platform-card';
+    card.style.borderLeftColor = p.color;
+    card.innerHTML = `<h4>${p.label}</h4>
+      <div class="row"><span>Atendimentos</span><b>${qtd}</b></div>
+      <div class="row"><span>Receita total</span><b>${fmtMoney(receita)}</b></div>
+      <div class="row"><span>Ticket médio</span><b>${fmtMoney(ticket)}</b></div>
+      <div class="row"><span>Horas de atendimento</span><b>${horas}h</b></div>`;
+    cardsWrap.appendChild(card);
+  });
+
+  renderCharts(monthAppts, weekTotals);
+  renderHoursChart();
+}
+
+function renderHoursChart(){
+  // total hours worked (regular appointments only) for the last 10 weeks ending at the most recent week with data, or this week
+  const weeksBack = 10;
+  let lastMonday = getMonday(new Date());
+  // if viewing a different month in reports, anchor the chart on that month's last week instead
+  const anchor = new Date(reportYear, reportMonth, 28);
+  if(anchor.getMonth()===reportMonth) lastMonday = getMonday(anchor);
+
+  const labels = [], hoursData = [];
+  for(let i=weeksBack-1; i>=0; i--){
+    const monday = new Date(lastMonday);
+    monday.setDate(lastMonday.getDate() - i*7);
+    const dates = weekDates(monday);
+    let hours = 0;
+    dates.forEach(d=>{ hours += getApptsForDate(d).length; });
+    labels.push(`${fmtDateShort(dates[0])}`);
+    hoursData.push(hours);
+  }
+
+  if(chartsInstances.hours) chartsInstances.hours.destroy();
+  const ctx = document.getElementById('chartHours').getContext('2d');
+  chartsInstances.hours = new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[{ label:'Horas trabalhadas', data:hoursData, backgroundColor:'#2F5D52', borderRadius:4 }] },
+    options:{ plugins:{legend:{display:false}}, scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 } } } }
+  });
+}
+
+function renderCharts(monthAppts, weekTotals){
+  Object.values(chartsInstances).forEach(c=>c.destroy());
+  chartsInstances = {};
+
+  // chart by week
+  const weekKeys = Object.keys(weekTotals).sort();
+  const ctx1 = document.getElementById('chartWeek').getContext('2d');
+  chartsInstances.week = new Chart(ctx1, {
+    type:'bar',
+    data:{
+      labels: weekKeys.map(k=>fmtDateShort(new Date(k+'T00:00:00'))),
+      datasets:[{label:'Receita', data: weekKeys.map(k=>weekTotals[k]), backgroundColor:'#2F5D52', borderRadius:4}]
+    },
+    options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}
+  });
+
+  // chart by platform
+  const platTotals = (CONFIG.platforms||[]).map(p=>monthAppts.filter(a=>a.platform===p.id).reduce((s,a)=>s+a.value,0));
+  const ctx2 = document.getElementById('chartPlatform').getContext('2d');
+  chartsInstances.platform = new Chart(ctx2, {
+    type:'doughnut',
+    data:{
+      labels: (CONFIG.platforms||[]).map(p=>p.label),
+      datasets:[{data:platTotals, backgroundColor:(CONFIG.platforms||[]).map(p=>p.color)}]
+    },
+    options:{plugins:{legend:{position:'bottom'}}}
+  });
+
+  // monthly evolution (last 6 months including current)
+  const months = [];
+  for(let i=5;i>=0;i--){
+    let m = reportMonth - i, y = reportYear;
+    while(m<0){ m+=12; y--; }
+    months.push({m,y});
+  }
+  const monthlyTotals = months.map(({m,y})=>{
+    let total = 0;
+    Object.keys(APPTS).forEach(key=>{
+      const [dateStr] = key.split('|');
+      const d = new Date(dateStr+'T00:00:00');
+      if(d.getMonth()===m && d.getFullYear()===y) total += APPTS[key].value;
+    });
+    return total;
+  });
+  const ctx3 = document.getElementById('chartMonthly').getContext('2d');
+  chartsInstances.monthly = new Chart(ctx3, {
+    type:'line',
+    data:{
+      labels: months.map(({m,y})=>`${MONTH_NAMES[m].slice(0,3)}/${String(y).slice(2)}`),
+      datasets:[{label:'Receita', data: monthlyTotals, borderColor:'#2F5D52', backgroundColor:'rgba(47,93,82,0.12)', fill:true, tension:0.3}]
+    },
+    options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}
+  });
+}
+
+/* ============ SETTINGS ============ */
+function renderSettings(){
+  const wrap = document.getElementById('settingsGrid');
+  wrap.innerHTML = '';
+  (CONFIG.platforms||[]).forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'settings-card';
+    card.innerHTML = `
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom:14px;">
+        <input type="color" class="platform-color-input" data-id="${p.id}" value="${p.color}" style="width:38px; height:38px; border:1.5px solid var(--line); border-radius:8px; padding:2px; cursor:pointer; flex:0 0 auto;" />
+        <input type="text" class="platform-name-input" data-id="${p.id}" value="${p.label}" style="flex:1; border:1.5px solid var(--line); border-radius:8px; padding:9px 11px; font-size:14px; font-weight:600;" />
+        <button class="remove-val remove-platform-btn" data-id="${p.id}" title="Remover plataforma" style="flex:0 0 auto;">✕</button>
+      </div>
+      <label style="display:block; font-size:11px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;">Valores sugeridos</label>
+      <div class="vals-list" data-p="${p.id}"></div>
+      <button class="add-val-btn" data-p="${p.id}">+ adicionar valor</button>`;
+    wrap.appendChild(card);
+    renderValuesList(p.id);
+  });
+  document.getElementById('metaInput').value = CONFIG.meta;
+
+  wrap.querySelectorAll('.add-val-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const p = getPlatform(btn.dataset.p);
+      p.values.push(0);
+      renderValuesList(btn.dataset.p);
+    });
+  });
+  wrap.querySelectorAll('.platform-color-input').forEach(inp=>{
+    inp.addEventListener('input', (e)=>{ getPlatform(e.target.dataset.id).color = e.target.value; });
+  });
+  wrap.querySelectorAll('.platform-name-input').forEach(inp=>{
+    inp.addEventListener('input', (e)=>{ getPlatform(e.target.dataset.id).label = e.target.value; });
+  });
+  wrap.querySelectorAll('.remove-platform-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.dataset.id;
+      const p = getPlatform(id);
+      if(!confirm(`Remover "${p.label}"? Atendimentos já registrados nessa plataforma serão mantidos, mas ela deixará de aparecer como opção.`)) return;
+      CONFIG.platforms = CONFIG.platforms.filter(pl=>pl.id!==id);
+      renderSettings();
+    });
+  });
+}
+function renderValuesList(id){
+  const list = document.querySelector(`.vals-list[data-p="${id}"]`);
+  const p = getPlatform(id);
+  list.innerHTML = '';
+  p.values.forEach((v,i)=>{
+    const row = document.createElement('div');
+    row.className = 'value-edit-row';
+    row.innerHTML = `<input type="number" value="${v}" step="0.01" /><button class="remove-val">✕</button>`;
+    row.querySelector('input').addEventListener('input', (e)=>{
+      p.values[i] = parseFloat(e.target.value)||0;
+    });
+    row.querySelector('.remove-val').addEventListener('click', ()=>{
+      p.values.splice(i,1);
+      renderValuesList(id);
+    });
+    list.appendChild(row);
+  });
+}
+document.getElementById('addPlatformBtn').addEventListener('click', ()=>{
+  CONFIG.platforms.push({ id: genId(), label: 'Nova plataforma', color: '#6B7280', values: [] });
+  renderSettings();
+});
+document.getElementById('saveSettingsBtn').addEventListener('click', async ()=>{
+  CONFIG.meta = parseFloat(document.getElementById('metaInput').value) || 0;
+  await saveConfig();
+  showToast('Configurações salvas');
+  renderAgenda();
+});
+
+/* ============ INIT ============ */
+async function startApp(user){
+  currentUser = user;
+  document.getElementById('userNameLabel').textContent = user.displayName || user.email;
+  setUserDocs(user.uid);
+  try{ await loadData(); }catch(e){ console.error(e); }
+
+  // Migrate from old shared Firestore path (pre-login) to per-user path
+  if(useFirebase && Object.keys(APPTS).length === 0){
+    try{
+      const db = firebase.firestore();
+      const oldConfig = await db.collection('raspael').doc('config').get();
+      const oldAppts  = await db.collection('raspael').doc('appointments').get();
+      if(oldAppts.exists && oldAppts.data().payload){
+        const oldData = JSON.parse(oldAppts.data().payload||'{}');
+        if(Object.keys(oldData).length > 0){
+          APPTS = oldData;
+          await saveAppts();
+          if(oldConfig.exists && oldConfig.data().payload){
+            CONFIG = JSON.parse(oldConfig.data().payload||'{}');
+            migrateConfig();
+            await saveConfig();
+          }
+          showToast('Dados anteriores importados para sua conta!');
+        }
+      }
+    }catch(e){ console.warn('Migração Firestore:', e); }
+  }
+
+  document.getElementById('loadingOverlay').style.display = 'none';
+  hideLoginScreen();
+  renderAgenda();
+}
+
+if(useFirebase){
+  showLoginScreen();
+  firebase.auth().onAuthStateChanged(async user=>{
+    if(user){
+      await startApp(user);
+    } else {
+      document.getElementById('loadingOverlay').style.display = 'none';
+      showLoginScreen();
+    }
+  });
+} else {
+  // No Firebase — run locally with localStorage
+  document.getElementById('loadingOverlay').style.display = 'none';
+  document.getElementById('logoutBtn').style.display = 'none';
+  document.getElementById('userNameLabel').style.display = 'none';
+  (async ()=>{ await loadData(); renderAgenda(); })();
+}
+</script>
+</body>
+</html>
