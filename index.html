@@ -1602,8 +1602,9 @@ async function startApp(user){
   setUserDocs(user.uid);
   try{ await loadData(); }catch(e){ console.error(e); }
 
-  // Migrate from old shared Firestore path (pre-login) to per-user path
-  if(useFirebase && Object.keys(APPTS).length === 0){
+  // Migrate from old shared Firestore path — only for the original owner account
+  const OWNER_UID = 'tWCrZWsGPccxZ5NZeAFlly8zJGU2';
+  if(useFirebase && Object.keys(APPTS).length === 0 && user.uid === OWNER_UID){
     try{
       const db = firebase.firestore();
       const oldConfig = await db.collection('raspael').doc('config').get();
