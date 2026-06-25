@@ -338,9 +338,10 @@ canvas{max-height:260px;}
       <div class="goal-left">
         <div class="eyebrow">Meta semanal</div>
         <div class="goal-figures">
-          <div class="fig"><div class="num" id="goalFaturado">R$ 0</div><div class="lbl">Faturado</div></div>
-          <div class="fig"><div class="num" id="goalFaltam">R$ 0</div><div class="lbl">Faltam</div></div>
           <div class="fig"><div class="num" id="goalMeta">R$ 0</div><div class="lbl">Meta</div></div>
+          <div class="fig"><div class="num" id="goalFaturado">R$ 0</div><div class="lbl">Faturado</div></div>
+          <div class="fig"><div class="num" id="goalPrevisto" style="opacity:0.8;">R$ 0</div><div class="lbl">Previsto</div></div>
+          <div class="fig"><div class="num" id="goalFaltam">R$ 0</div><div class="lbl">Faltam</div></div>
         </div>
         <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
         <div class="progress-pct" id="progressPct">0% da meta atingida</div>
@@ -894,15 +895,23 @@ function renderAgenda(){
   const weekAppts = dates.flatMap(d=>getApptsForDate(d));
   const totalQtd = weekAppts.length;
   const totalReceita = weekAppts.reduce((s,a)=>s+a.value,0);
+
+  // Previsto = all appointments this week (realized + scheduled, excluding falta and eventos)
+  const weekAllAppts = dates.flatMap(d=>getAllApptsForDate(d));
+  const totalPrevisto = weekAllAppts
+    .filter(a => getApptStatus(a._key) !== 'falta')
+    .reduce((s,a)=>s+a.value, 0);
+
   document.getElementById('weekTotalQtd').textContent = totalQtd;
   document.getElementById('weekTotalReceita').textContent = fmtMoney(totalReceita);
 
   const meta = CONFIG.meta;
   const faltam = Math.max(meta - totalReceita, 0);
   const pct = meta>0 ? Math.min((totalReceita/meta)*100, 999) : 0;
-  document.getElementById('goalFaturado').textContent = fmtMoneyShort(totalReceita);
-  document.getElementById('goalFaltam').textContent = fmtMoneyShort(faltam);
   document.getElementById('goalMeta').textContent = fmtMoneyShort(meta);
+  document.getElementById('goalFaturado').textContent = fmtMoneyShort(totalReceita);
+  document.getElementById('goalPrevisto').textContent = fmtMoneyShort(totalPrevisto);
+  document.getElementById('goalFaltam').textContent = fmtMoneyShort(faltam);
   document.getElementById('progressFill').style.width = Math.min(pct,100)+'%';
   document.getElementById('progressPct').textContent = `${pct.toFixed(0)}% da meta atingida`;
 
